@@ -149,14 +149,17 @@ namespace SteamDownloadMonitor
         {
             if(name.Equals(_shutdownAppName))
             {
-                //Display warning dialog first to give the opportunity to cancel shutdown
-
-                //var psi = new ProcessStartInfo("shutdown", "/s /t 0")
-                //{
-                //    CreateNoWindow = true,
-                //    UseShellExecute = false
-                //};
-                //Process.Start(psi);
+                var warning = (ShutdownWarningDialog)Program.ServiceProvider.GetService(typeof(ShutdownWarningDialog));
+                var result = warning.ShowTimedDialog(5);
+                if(result == DialogResult.OK)
+                {
+                    var psi = new ProcessStartInfo("shutdown", "/s /t 0")
+                    {
+                        CreateNoWindow = true,
+                        UseShellExecute = false
+                    };
+                    Process.Start(psi);
+                }
             }
         }
 
@@ -190,15 +193,6 @@ namespace SteamDownloadMonitor
 
             var checkedItem = e.Item.Text;
 
-        }
-
-        private void button1_Click(object sender, EventArgs e)
-        {
-            var warning = (ShutdownWarningDialog)Program.ServiceProvider.GetService(typeof(ShutdownWarningDialog));
-            warning.Location = new Point(0, 0);
-            warning.Width = Screen.PrimaryScreen.Bounds.Width;
-            warning.Height = Screen.PrimaryScreen.Bounds.Height;
-            warning.ShowDialog();
         }
     }
 }
