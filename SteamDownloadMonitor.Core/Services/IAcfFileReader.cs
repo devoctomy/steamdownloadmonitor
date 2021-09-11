@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace SteamDownloadMonitor.Services
+namespace SteamDownloadMonitor.Core.Services
 {
     public interface IAcfFileReader
     {

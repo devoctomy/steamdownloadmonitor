@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace SteamDownloadMonitor.Services
+namespace SteamDownloadMonitor.Core.Services
 {
     public class DownloadStartedEventArgs : EventArgs
     {

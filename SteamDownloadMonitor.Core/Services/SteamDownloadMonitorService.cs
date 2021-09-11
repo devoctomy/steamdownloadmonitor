@@ -5,7 +5,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace SteamDownloadMonitor.Services
+namespace SteamDownloadMonitor.Core.Services
 {
     public class SteamDownloadMonitorService : ISteamDownloadMonitorService
     {
@@ -66,7 +66,6 @@ namespace SteamDownloadMonitor.Services
                     long bytesDownloaded = long.Parse(bytesDownloadedValue);
                     if (bytesToDownload - bytesDownloaded > 0)
                     {
-                        Console.WriteLine($"{name} is currently downloading...");
                         if (!_downloading.Contains(name))
                         {
                             DownloadStarted?.Invoke(this, new DownloadStartedEventArgs { Name = name });

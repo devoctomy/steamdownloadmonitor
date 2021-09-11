@@ -1,0 +1,33 @@
+﻿"AppState"
+{
+	"appid"		"000001"
+	"Universe"		"1"
+	"LauncherPath"		"C:\\Program Files (x86)\\Steam\\steam.exe"
+	"name"		"Some Game"
+	"StateFlags"		"4"
+	"installdir"		"Some Game"
+	"LastUpdated"		"1629042284"
+	"UpdateResult"		"0"
+	"SizeOnDisk"		"54945651331"
+	"buildid"		"5979231"
+	"LastOwner"		"76561198035876811"
+	"BytesToDownload"		"55382650464"
+	"BytesDownloaded"		"55382650464"
+	"BytesToStage"		"54945651331"
+	"BytesStaged"		"54945651331"
+	"AutoUpdateBehavior"		"0"
+	"AllowOtherDownloadsWhileRunning"		"0"
+	"ScheduledAutoUpdate"		"0"
+	"InstalledDepots"
+	{
+		"582011"
+		{
+			"manifest"		"7293796546842464821"
+			"size"		"54945651331"
+		}
+	}
+	"UserConfig"
+	{
+		"language"		"english"
+	}
+}

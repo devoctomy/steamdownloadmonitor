@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-namespace SteamDownloadMonitor.Services
+namespace SteamDownloadMonitor.Core.Services
 {
     public class AcfFileReader : IAcfFileReader
     {

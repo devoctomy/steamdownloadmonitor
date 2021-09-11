@@ -20,4 +20,8 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.2" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\SteamDownloadMonitor.Core\SteamDownloadMonitor.Core.csproj" />
+  </ItemGroup>
+
 </Project>

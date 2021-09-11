@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-namespace SteamDownloadMonitor.Services
+namespace SteamDownloadMonitor.Core.Services
 {
     public interface ISteamDownloadMonitorService
     {

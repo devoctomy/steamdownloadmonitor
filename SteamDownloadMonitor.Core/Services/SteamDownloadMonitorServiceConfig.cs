@@ -1,4 +1,4 @@
-﻿namespace SteamDownloadMonitor.Services
+﻿namespace SteamDownloadMonitor.Core.Services
 {
     public class SteamDownloadMonitorServiceConfig
     {
