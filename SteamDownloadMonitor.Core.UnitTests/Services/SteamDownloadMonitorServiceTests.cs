@@ -23,10 +23,10 @@ namespace SteamDownloadMonitor.Core.UnitTests.Services
             var sut = new SteamDownloadMonitorService(
                 config,
                 new AcfFileReader());
-            var manualResetEvent = new ManualResetEvent(false);
+            var readyEvent = new ManualResetEvent(false);
             var startedName = string.Empty;
             sut.DownloadStarted += delegate (object sender, DownloadStartedEventArgs e) {
-                manualResetEvent.Set();
+                readyEvent.Set();
                 startedName = e.Name;
             };
             sut.Start();
@@ -41,7 +41,7 @@ namespace SteamDownloadMonitor.Core.UnitTests.Services
                     { "$BytesToDownload", "100" },
                     { "$BytesDownloaded", "0" }
                 });
-            var downloadStarted = manualResetEvent.WaitOne(2000);
+            var downloadStarted = readyEvent.WaitOne(2000);
             await sut.Stop();
 
             // Assert
@@ -50,11 +50,11 @@ namespace SteamDownloadMonitor.Core.UnitTests.Services
         }
 
         [Fact]
-        [TestIsolatedOutputDirectory("output/GivenConfig_AndServiceStarted_WhenAppAdded_ThenDownloadStartedRaised")]
-        public async Task GivenConfig_AndServiceStarted_WhenAppFinishedDownloading_ThenDownloadFinishedRaised()
+        [TestIsolatedOutputDirectory("output/GivenConfig_AndServiceStarted_AndAppDownloading_WhenAppFinishedDownloading_ThenDownloadFinishedRaised")]
+        public async Task GivenConfig_AndServiceStarted_AndAppDownloading_WhenAppFinishedDownloading_ThenDownloadFinishedRaised()
         {
             // Arrange
-            var outputDir = "output/GivenConfig_AndServiceStarted_WhenAppAdded_ThenDownloadStartedRaised";
+            var outputDir = "output/GivenConfig_AndServiceStarted_AndAppDownloading_WhenAppFinishedDownloading_ThenDownloadFinishedRaised";
             var config = new SteamDownloadMonitorServiceConfig
             {
                 SteamAppsPath = outputDir,
@@ -63,10 +63,10 @@ namespace SteamDownloadMonitor.Core.UnitTests.Services
             var sut = new SteamDownloadMonitorService(
                 config,
                 new AcfFileReader());
-            var manualResetEvent = new ManualResetEvent(false);
+            var readyEvent = new ManualResetEvent(false);
             var finishedName = string.Empty;
             sut.DownloadFinished += delegate (object sender, DownloadFinishedEventArgs e) {
-                manualResetEvent.Set();
+                readyEvent.Set();
                 finishedName = e.Name;
             };
             await CreateAcfFileFromTemplate(
@@ -79,9 +79,9 @@ namespace SteamDownloadMonitor.Core.UnitTests.Services
                     { "$BytesDownloaded", "0" }
                 });
             sut.Start();
+            await Task.Delay(100);
 
             // Act
-            await Task.Delay(100);
             await CreateAcfFileFromTemplate(
                 "appmanifest_limitedtemplate.acf",
                 $"{outputDir}/appmanifest_000001.acf",
@@ -91,7 +91,7 @@ namespace SteamDownloadMonitor.Core.UnitTests.Services
                     { "$BytesToDownload", "100" },
                     { "$BytesDownloaded", "100" }
                 });
-            var downloadFinished = manualResetEvent.WaitOne(2000);
+            var downloadFinished = readyEvent.WaitOne(2000);
             await sut.Stop();
 
             // Assert
