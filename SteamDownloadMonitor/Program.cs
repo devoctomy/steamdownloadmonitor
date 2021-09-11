@@ -8,6 +8,8 @@ namespace SteamDownloadMonitor
 {
     static class Program
     {
+        public static ServiceProvider ServiceProvider { get; private set;}
+
         [STAThread]
         static void Main()
         {
@@ -23,6 +25,7 @@ namespace SteamDownloadMonitor
             });
             using (ServiceProvider serviceProvider = services.BuildServiceProvider())
             {
+                ServiceProvider = serviceProvider;
                 var settings = serviceProvider.GetRequiredService<SettingsDialog>();
                 Application.Run(settings);
             }
@@ -31,6 +34,7 @@ namespace SteamDownloadMonitor
         private static void ConfigureForms(IServiceCollection services)
         {
             services.AddScoped<SettingsDialog>();
+            services.AddScoped<ShutdownWarningDialog>();
         }
     }
 }

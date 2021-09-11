@@ -39,21 +39,33 @@ namespace SteamDownloadMonitor
                 if (_menuItems.TryGetValue(_shutdownAppName, out var currentMenuItem))
                 {
                     currentMenuItem.Checked = false;
-                    _shutdownAppName = string.Empty;
                 }
+
+                if(_listViewItems.TryGetValue(_shutdownAppName, out var currentListViewItem))
+                {
+                    currentListViewItem.Checked = false;
+                }
+
+                _shutdownAppName = string.Empty;
             }
 
+            bool newState = !(_shutdownAppName == name);
             if (_menuItems.TryGetValue(name, out var newMenuItem))
             {
-                newMenuItem.Checked = !newMenuItem.Checked;
-                _shutdownAppName = newMenuItem.Checked ? name : string.Empty;
+                newMenuItem.Checked = newState;
             }
+
+            if (_listViewItems.TryGetValue(_shutdownAppName, out var newListViewItem))
+            {
+                newListViewItem.Checked = newState;
+            }
+
+            _shutdownAppName = newState ? name : string.Empty;
         }
 
         private void ToggleStartStopButton(bool isStarted)
         {
             StartStopButton.Text = isStarted ? "Stop" : "Start";
-            StartStopButton.BackColor = isStarted ? Color.Red : Color.Green;
             _isRunning = isStarted;
         }
 
@@ -139,12 +151,12 @@ namespace SteamDownloadMonitor
             {
                 //Display warning dialog first to give the opportunity to cancel shutdown
 
-                var psi = new ProcessStartInfo("shutdown", "/s /t 0")
-                {
-                    CreateNoWindow = true,
-                    UseShellExecute = false
-                };
-                Process.Start(psi);
+                //var psi = new ProcessStartInfo("shutdown", "/s /t 0")
+                //{
+                //    CreateNoWindow = true,
+                //    UseShellExecute = false
+                //};
+                //Process.Start(psi);
             }
         }
 
@@ -158,6 +170,7 @@ namespace SteamDownloadMonitor
                 {
                     await _streamDownloadMonitorService.Stop();
                     ToggleStartStopButton(false);
+                    DownloadsListView.Items.Clear();
                 }
                 else
                 {
@@ -166,6 +179,26 @@ namespace SteamDownloadMonitor
                 }
                 StartStopButton.Enabled = true;
             });
+        }
+
+        private void DownloadsListView_ItemChecked(object sender, ItemCheckedEventArgs e)
+        {
+            if(!string.IsNullOrEmpty(_shutdownAppName))
+            {
+                _shutdownAppName = string.Empty;
+            }
+
+            var checkedItem = e.Item.Text;
+
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            var warning = (ShutdownWarningDialog)Program.ServiceProvider.GetService(typeof(ShutdownWarningDialog));
+            warning.Location = new Point(0, 0);
+            warning.Width = Screen.PrimaryScreen.Bounds.Width;
+            warning.Height = Screen.PrimaryScreen.Bounds.Height;
+            warning.ShowDialog();
         }
     }
 }

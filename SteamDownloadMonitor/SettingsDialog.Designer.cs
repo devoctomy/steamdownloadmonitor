@@ -38,6 +38,7 @@ namespace SteamDownloadMonitor
             this.DownloadsListView = new System.Windows.Forms.ListView();
             this.DownloadName = new System.Windows.Forms.ColumnHeader();
             this.StartStopButton = new System.Windows.Forms.Button();
+            this.button1 = new System.Windows.Forms.Button();
             this.ContextMenu.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -81,6 +82,7 @@ namespace SteamDownloadMonitor
             this.DownloadsListView.TabIndex = 1;
             this.DownloadsListView.UseCompatibleStateImageBehavior = false;
             this.DownloadsListView.View = System.Windows.Forms.View.Details;
+            this.DownloadsListView.ItemChecked += new System.Windows.Forms.ItemCheckedEventHandler(this.DownloadsListView_ItemChecked);
             // 
             // DownloadName
             // 
@@ -90,7 +92,6 @@ namespace SteamDownloadMonitor
             // StartStopButton
             // 
             this.StartStopButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.StartStopButton.BackColor = System.Drawing.Color.Lime;
             this.StartStopButton.Location = new System.Drawing.Point(12, 284);
             this.StartStopButton.Name = "StartStopButton";
             this.StartStopButton.Size = new System.Drawing.Size(104, 34);
@@ -99,11 +100,22 @@ namespace SteamDownloadMonitor
             this.StartStopButton.UseVisualStyleBackColor = false;
             this.StartStopButton.Click += new System.EventHandler(this.StartStopButton_Click);
             // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(227, 278);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(52, 39);
+            this.button1.TabIndex = 3;
+            this.button1.Text = "button1";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
+            // 
             // SettingsDialog
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(310, 330);
+            this.Controls.Add(this.button1);
             this.Controls.Add(this.StartStopButton);
             this.Controls.Add(this.DownloadsListView);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
@@ -126,6 +138,7 @@ namespace SteamDownloadMonitor
         private System.Windows.Forms.ListView DownloadsListView;
         private System.Windows.Forms.ColumnHeader DownloadName;
         private System.Windows.Forms.Button StartStopButton;
+        private System.Windows.Forms.Button button1;
     }
 }
 
