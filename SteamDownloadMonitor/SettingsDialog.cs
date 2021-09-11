@@ -3,6 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Drawing;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace SteamDownloadMonitor
@@ -11,7 +13,9 @@ namespace SteamDownloadMonitor
     {
         private readonly ISteamDownloadMonitorService _streamDownloadMonitorService;
         private readonly Dictionary<string, ToolStripMenuItem> _menuItems;
+        private readonly Dictionary<string, ListViewItem> _listViewItems;
         private string _shutdownAppName = string.Empty;
+        private bool _isRunning = false;
 
         public bool AllowVisible { get; set; }
         public bool AllowClose { get; set; }
@@ -22,8 +26,10 @@ namespace SteamDownloadMonitor
             _streamDownloadMonitorService.DownloadStarted += _streamDownloadMonitorService_DownloadStarted;
             _streamDownloadMonitorService.DownloadFinished += _streamDownloadMonitorService_DownloadFinished;
             _menuItems = new Dictionary<string, ToolStripMenuItem>();
+            _listViewItems = new Dictionary<string, ListViewItem>();
             InitializeComponent();
             _streamDownloadMonitorService.Start();
+            ToggleStartStopButton(true);
         }
 
         public void ToggleAppShutDownWhenFinished(string name)
@@ -44,6 +50,13 @@ namespace SteamDownloadMonitor
             }
         }
 
+        private void ToggleStartStopButton(bool isStarted)
+        {
+            StartStopButton.Text = isStarted ? "Stop" : "Start";
+            StartStopButton.BackColor = isStarted ? Color.Red : Color.Green;
+            _isRunning = isStarted;
+        }
+
         private void _streamDownloadMonitorService_DownloadFinished(
             object sender,
             DownloadFinishedEventArgs e)
@@ -52,6 +65,12 @@ namespace SteamDownloadMonitor
             {
                 ContextMenu.Items.Remove(menuItem);
                 _menuItems.Remove(e.Name);
+            }
+            
+            if(_listViewItems.TryGetValue(e.Name, out var listViewItem))
+            {
+                DownloadsListView.Items.Remove(listViewItem);
+                _listViewItems.Remove(e.Name);
             }
             TestAndPerformShutdown(e.Name);
         }
@@ -63,6 +82,10 @@ namespace SteamDownloadMonitor
             var menuItem = CreateMenuItem(e.Name);
             ContextMenu.Items.Insert(0, menuItem);
             _menuItems.Add(e.Name, menuItem);
+
+            var listViewItem = CreateListViewItem(e.Name);
+            DownloadsListView.Items.Add(listViewItem);
+            _listViewItems.Add(e.Name, listViewItem);
         }
 
         private ToolStripMenuItem CreateMenuItem(string name)
@@ -70,6 +93,12 @@ namespace SteamDownloadMonitor
             var menuItem = new ToolStripMenuItem(name);
             menuItem.Click += MenuItem_Click;
             return menuItem;
+        }
+
+        private ListViewItem CreateListViewItem(string name)
+        {
+            var listViewItem = new ListViewItem(name);
+            return listViewItem;
         }
 
         private void MenuItem_Click(object sender, EventArgs e)
@@ -117,6 +146,26 @@ namespace SteamDownloadMonitor
                 };
                 Process.Start(psi);
             }
+        }
+
+        private async void StartStopButton_Click(object sender, EventArgs e)
+        {
+            await Task.Yield();
+            Invoke((MethodInvoker)async delegate
+            {
+                StartStopButton.Enabled = false;
+                if(_isRunning)
+                {
+                    await _streamDownloadMonitorService.Stop();
+                    ToggleStartStopButton(false);
+                }
+                else
+                {
+                    _streamDownloadMonitorService.Start();
+                    ToggleStartStopButton(true);
+                }
+                StartStopButton.Enabled = true;
+            });
         }
     }
 }
