@@ -41,11 +41,12 @@ namespace SteamDownloadMonitor
             // Cancel
             // 
             this.Cancel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.Cancel.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.Cancel.Location = new System.Drawing.Point(3, 187);
             this.Cancel.Name = "Cancel";
             this.Cancel.Size = new System.Drawing.Size(293, 90);
             this.Cancel.TabIndex = 0;
-            this.Cancel.Text = "Cancel";
+            this.Cancel.Text = "Cancel Shutdown";
             this.Cancel.UseVisualStyleBackColor = true;
             this.Cancel.Click += new System.EventHandler(this.CancelButton_Click);
             // 

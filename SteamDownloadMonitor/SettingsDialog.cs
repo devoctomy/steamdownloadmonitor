@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Drawing;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -12,17 +11,20 @@ namespace SteamDownloadMonitor
     public partial class SettingsDialog : Form
     {
         private readonly ISteamDownloadMonitorService _streamDownloadMonitorService;
+        private readonly IMutuallyExclusiveToggleStateTracker _mutuallyExclusiveToggleStateTracker;
         private readonly Dictionary<string, ToolStripMenuItem> _menuItems;
         private readonly Dictionary<string, ListViewItem> _listViewItems;
-        private string _shutdownAppName = string.Empty;
         private bool _isRunning = false;
 
         public bool AllowVisible { get; set; }
         public bool AllowClose { get; set; }
 
-        public SettingsDialog(ISteamDownloadMonitorService streamDownloadMonitorService)
+        public SettingsDialog(
+            ISteamDownloadMonitorService streamDownloadMonitorService,
+            IMutuallyExclusiveToggleStateTracker mutuallyExclusiveToggleStateTracker)
         {
             _streamDownloadMonitorService = streamDownloadMonitorService;
+            _mutuallyExclusiveToggleStateTracker = mutuallyExclusiveToggleStateTracker;
             _streamDownloadMonitorService.DownloadStarted += _streamDownloadMonitorService_DownloadStarted;
             _streamDownloadMonitorService.DownloadFinished += _streamDownloadMonitorService_DownloadFinished;
             _menuItems = new Dictionary<string, ToolStripMenuItem>();
@@ -32,35 +34,35 @@ namespace SteamDownloadMonitor
             ToggleStartStopButton(true);
         }
 
-        public void ToggleAppShutDownWhenFinished(string name)
+        public void ToggleAppShutDownWhenFinished(
+            string name,
+            bool? state = null)
         {
-            if(!string.IsNullOrEmpty(_shutdownAppName))
+            if(state.HasValue)
             {
-                if (_menuItems.TryGetValue(_shutdownAppName, out var currentMenuItem))
-                {
-                    currentMenuItem.Checked = false;
-                }
-
-                if(_listViewItems.TryGetValue(_shutdownAppName, out var currentListViewItem))
-                {
-                    currentListViewItem.Checked = false;
-                }
-
-                _shutdownAppName = string.Empty;
+                _mutuallyExclusiveToggleStateTracker.SetItemState(
+                    name,
+                    state.GetValueOrDefault());
+            }
+            else
+            {
+                _mutuallyExclusiveToggleStateTracker.ToggleItemState(name);
             }
 
-            bool newState = !(_shutdownAppName == name);
-            if (_menuItems.TryGetValue(name, out var newMenuItem))
+            ReflectSelectedCheckState();
+        }
+
+        private void ReflectSelectedCheckState()
+        {
+            foreach(var curMenuItemKey in _menuItems.Keys)
             {
-                newMenuItem.Checked = newState;
+                _menuItems[curMenuItemKey].Checked = _mutuallyExclusiveToggleStateTracker.GetItemState(curMenuItemKey);
             }
 
-            if (_listViewItems.TryGetValue(_shutdownAppName, out var newListViewItem))
+            foreach (var curListViewItemKey in _listViewItems.Keys)
             {
-                newListViewItem.Checked = newState;
+                _listViewItems[curListViewItemKey].Checked = _mutuallyExclusiveToggleStateTracker.GetItemState(curListViewItemKey);
             }
-
-            _shutdownAppName = newState ? name : string.Empty;
         }
 
         private void ToggleStartStopButton(bool isStarted)
@@ -84,13 +86,17 @@ namespace SteamDownloadMonitor
                 DownloadsListView.Items.Remove(listViewItem);
                 _listViewItems.Remove(e.Name);
             }
+
             TestAndPerformShutdown(e.Name);
+            _mutuallyExclusiveToggleStateTracker.RemoveItem(e.Name);
         }
 
         private void _streamDownloadMonitorService_DownloadStarted(
             object sender,
             DownloadStartedEventArgs e)
         {
+            _mutuallyExclusiveToggleStateTracker.AddItem(e.Name);
+
             var menuItem = CreateMenuItem(e.Name);
             ContextMenu.Items.Insert(0, menuItem);
             _menuItems.Add(e.Name, menuItem);
@@ -145,9 +151,9 @@ namespace SteamDownloadMonitor
             Close();
         }
 
-        private void TestAndPerformShutdown(string name)
+        private bool TestAndPerformShutdown(string name)
         {
-            if(name.Equals(_shutdownAppName))
+            if(_mutuallyExclusiveToggleStateTracker.GetItemState(name))
             {
                 var warning = (ShutdownWarningDialog)Program.ServiceProvider.GetService(typeof(ShutdownWarningDialog));
                 var result = warning.ShowTimedDialog(5);
@@ -160,7 +166,11 @@ namespace SteamDownloadMonitor
                     };
                     Process.Start(psi);
                 }
+
+                return true;
             }
+
+            return false;
         }
 
         private async void StartStopButton_Click(object sender, EventArgs e)
@@ -185,14 +195,10 @@ namespace SteamDownloadMonitor
         }
 
         private void DownloadsListView_ItemChecked(object sender, ItemCheckedEventArgs e)
-        {
-            if(!string.IsNullOrEmpty(_shutdownAppName))
-            {
-                _shutdownAppName = string.Empty;
-            }
-
-            var checkedItem = e.Item.Text;
-
+        {           
+            ToggleAppShutDownWhenFinished(
+                e.Item.Text,
+                e.Item.Checked);
         }
     }
 }

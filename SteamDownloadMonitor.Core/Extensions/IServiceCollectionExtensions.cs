@@ -17,6 +17,7 @@ namespace SteamDownloadMonitor.Core.Extensions
             services.AddSingleton<SteamDownloadMonitorServiceConfig>(config);
             services.AddScoped<IAcfFileReader, AcfFileReader>();
             services.AddScoped<ISteamDownloadMonitorService, SteamDownloadMonitorService>();
+            services.AddScoped<IMutuallyExclusiveToggleStateTracker, MutuallyExclusiveToggleStateTracker>();
         }
     }
 }
